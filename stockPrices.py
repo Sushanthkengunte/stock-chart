@@ -13,6 +13,7 @@ from mpld3 import plugins
 
 import json
 
+import datetime
 
 
 app = Flask(__name__)
@@ -20,9 +21,15 @@ app = Flask(__name__)
 
 
 stocks = {"Apple":"EOD/AAPL",
-            "something":"CODE"
+          "Microsoft":"EOD/MSFT",
+          "Ebay":"EOD/EBAY",
+          "Walmart":"EOD/WMT",
+          "Tableau":"EOD/DATA",
+          "Disney":"EOD/DIS"
           }
 
+dataset = None
+prevCompany = None
 
 @app.route("/")
 def index():
@@ -35,24 +42,44 @@ def index():
 @app.route("/stockChart",methods=['POST'])
 def convertDataToChart():
     data = json.loads(request.data)
+
+    if data == None:
+        '<script type="text/javascript">alert("Something went wrong while sending the request or getting the company name, Please try again");</script>'
+
+    global prevCompany
+
     companyName = data['companyName']
-    if data != None and companyName in stocks.keys():
-        companyCode = stocks[companyName]
-        data = api.getData(companyCode)
-        htmlFormOfGraph = generateChart(data,companyName)
-        return htmlFormOfGraph
+
+    startYear = data['startYear']
+    endYear = data['endYear']
+
+
+    priceType = data['typeOfPrice'].strip()
+    companyCode = stocks[companyName]
+    global dataset
+    try:
+        if dataset is None or prevCompany != companyName:
+            dataset = api.getData(companyCode)
+    except Exception as error:
+        return str(error)
+
     else:
-        return '<script type="text/javascript">alert("Something went wrong while sending the request or getting the company name, Please try again");</script>'
+        prevCompany = companyName
+        htmlFormOfGraph = generateChart(companyName, startYear, endYear)
+        return htmlFormOfGraph
 
 
-
-
-
-def generateChart(data,companyName):
-
+def generateChart(companyName,startYear,endYear,priceType='Open'):
+    global dataset
+    # print(dataset)
     fig, ax = plt.subplots(figsize=(10, 6))
+    prices = dataset[priceType]
 
-    stockPrices = data['Open'].values
+
+    data = prices.loc[startYear:endYear]
+
+
+    stockPrices = data.values
     lastTenAverage = list()
     for i in range(len(stockPrices)):
         lastTenAverage.append((sum(stockPrices[max(0, i - 10):i])) / (1 if (i - max(0, i - 10)) == 0 else (i - max(0, i - 10))))
