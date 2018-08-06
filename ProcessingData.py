@@ -1,17 +1,6 @@
-from flask import Flask, render_template, request
-import api
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-plt.ioff()
-
-from threading import Lock
-lock = Lock()
 
 import mpld3
 from mpld3 import plugins
-
-import json
 
 
 
@@ -68,50 +57,3 @@ def generateChart(companyName,data):
 
 dataset = None
 prevCompany = None
-
-
-
-
-app = Flask(__name__)
-
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
-
-
-
-@app.route("/stockChart",methods=['POST'])
-def convertDataFromApiToChart():
-    data = json.loads(request.data)
-
-    global prevCompany
-
-    #get parameters from views
-    companyName = data['companyName']
-    startYear = data['startYear']
-    endYear = data['endYear']
-
-    companyCode = stocks[companyName]
-    global dataset
-    try:
-        if dataset is None or prevCompany != companyName:
-            dataset = api.getData(companyCode)
-
-    except Exception as error:
-        return str(error)
-
-    else:
-        prevCompany = companyName
-        filteredData = filterData(dataset,startYear, endYear)
-        htmlFormOfGraph = generateChart(companyName,filteredData)
-        return htmlFormOfGraph
-
-
-
-
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=7777)

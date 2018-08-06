@@ -1,0 +1,165 @@
+ 
+{% extends "baseTemplate.html" %}
+{% block content %}
+
+
+<div class="row">
+
+ <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+<div class="jumbotron">
+     <p>Select Company Name</p>
+
+         <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" name="company" class="form-check-input" value="Apple" checked>Apple</input>
+          </label>
+        </div>
+
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" name="company" class="form-check-input" value="Microsoft" >Microsoft</input>
+          </label>
+        </div>
+
+
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" name="company" class="form-check-input" value="Ebay" >Ebay</input>
+          </label>
+        </div>
+
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" name="company" class="form-check-input" value="Walmart" >Walmart</input>
+          </label>
+        </div>
+
+
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" name="company" class="form-check-input" value="Tableau" >Tableau</input>
+          </label>
+        </div>
+
+        <div class="form-check-inline">
+          <label class="form-check-label">
+            <input type="radio" name="company" class="form-check-input" value="Disney">Disney</input>
+          </label>
+        </div>
+
+        <br/>
+
+
+      <div class="row">
+        <br>
+          <div class="form-group col-md-6">
+            <label for="begin">Start Year</label>
+              <input type="text" class="form-control" id="begin" name="start" value="1980">
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="end">End Year</label>
+            <input type="text" class="form-control" id="end" name="end" value="2018">
+          </div>
+
+          <br>
+      </div>
+
+        <button type="button" id="drawPlot" class="btn btn-success" >Stock Price</button>
+
+        <button type="button" id="reset" class="btn">Reset</button>
+
+        <br/>
+
+  </div>
+</div> 
+
+  <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+
+    <div id="chart" ></div>
+
+  </div>
+</div>
+
+
+<div id="progress">
+    
+      <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">
+        Loading...
+      </div>
+    
+  </div>
+
+
+<script type="text/javascript">  
+
+$("#progress").hide();
+
+
+$("#reset").click(function() {
+
+  $("#chart").empty();
+});
+
+
+
+function validateDate(startYear,endYear){
+  if(startYear.trim().length == 0)
+    startYear = "1980";
+   var currentTime = new Date()
+  if(endYear.trim().length == 0){
+
+    endYear = currentTime.getFullYear().toString();
+  }
+  var start = parseInt(startYear.trim(),10);
+  var end = parseInt(endYear.trim(),10);
+  
+
+  if(startYear>endYear || startYear<1980 || endYear>currentTime.getFullYear() ){
+    alert("Please enter the correct years between 1980 to now");
+    return {result: false,startYear: "0",endYear:"0"};
+  }
+
+  return {result:true,startYear:startYear,endYear:endYear};
+
+}
+
+
+$("#drawPlot").click(function() {
+
+
+
+  var startYear = $('input:text[name=start]').val();
+  var endYear = $('input:text[name=end]').val();
+  
+
+  var companyName = $('input:radio[name=company]:checked').val();
+  var validateDatedOutcome = validateDate(startYear,endYear);
+  if(validateDatedOutcome.result){
+
+        $("#progress").show();
+        $("#chart").hide();
+        var display = {"companyName":companyName,"startYear":validateDatedOutcome.startYear,"endYear":validateDatedOutcome.endYear}
+        $.ajax({
+          type: "POST",
+          async:true,
+          contentType: "application/json; charset=utf-8",
+          url: "/stockChart",
+          data: JSON.stringify(display),
+          success: function (data) {     
+           var graph = $("#chart");
+           graph.html(data);
+            $("#progress").hide();
+           $("#chart").show();
+         },
+         dataType: "html"
+       });
+    }
+    });
+
+
+
+</script>
+
+
+{% endblock %}
