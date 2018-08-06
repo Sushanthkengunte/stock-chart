@@ -48,10 +48,10 @@
         </div>
 
         <br/>
-
+        <br>
 
       <div class="row">
-        <br>
+        
           <div class="form-group col-md-6">
             <label for="begin">Start Year</label>
               <input type="text" class="form-control" id="begin" name="start" value="1980">
@@ -102,15 +102,20 @@ $("#reset").click(function() {
 });
 
 
-
+// client side validation
 function validateDate(startYear,endYear){
+
+
   if(startYear.trim().length == 0)
     startYear = "1980";
+
    var currentTime = new Date()
   if(endYear.trim().length == 0){
 
     endYear = currentTime.getFullYear().toString();
   }
+
+
   var start = parseInt(startYear.trim(),10);
   var end = parseInt(endYear.trim(),10);
   
@@ -127,19 +132,22 @@ function validateDate(startYear,endYear){
 
 $("#drawPlot").click(function() {
 
-
-
   var startYear = $('input:text[name=start]').val();
   var endYear = $('input:text[name=end]').val();
   
 
   var companyName = $('input:radio[name=company]:checked').val();
   var validateDatedOutcome = validateDate(startYear,endYear);
+
+
   if(validateDatedOutcome.result){
 
         $("#progress").show();
         $("#chart").hide();
+
         var display = {"companyName":companyName,"startYear":validateDatedOutcome.startYear,"endYear":validateDatedOutcome.endYear}
+
+
         $.ajax({
           type: "POST",
           async:true,
