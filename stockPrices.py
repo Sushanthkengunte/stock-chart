@@ -75,7 +75,7 @@ def convertDataFromApiToChart():
 
     global prevCompany
 
-    #get parameters from views
+    #get parameters from view
     companyName = data['companyName']
     startYear = data['startYear']
     endYear = data['endYear']
